@@ -8,7 +8,8 @@ class App {
     renderer: WebGLRenderer;
     controls: CameraControls;
 
-    constructor() {
+    constructor(data: any) {
+        console.log(data);
         this.render = this.render.bind(this);
         this.update = this.update.bind(this);
         this.viewLoop = this.viewLoop.bind(this);
@@ -26,7 +27,6 @@ class App {
         });
 
         this.controls = new OrbitControls(this.camera, this.renderer.domElement);
-        
         this.viewLoop();
     }
 

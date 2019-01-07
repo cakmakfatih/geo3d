@@ -4,7 +4,7 @@ declare class App {
     camera: PerspectiveCamera;
     renderer: WebGLRenderer;
     controls: CameraControls;
-    constructor();
+    constructor(data: any);
     viewLoop(): void;
     render(): void;
     update(): void;

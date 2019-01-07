@@ -1,3 +1,2 @@
 import App from './app';
-
-new App();
+new App(JSON.parse(document.currentScript.getAttribute("data")) || {});
