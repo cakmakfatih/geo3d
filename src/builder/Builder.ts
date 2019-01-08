@@ -1,17 +1,19 @@
 import * as THREE from 'three';
-import { Scene, PerspectiveCamera, WebGLRenderer, OrbitControls as CameraControls, Vector3 } from 'three';
-import { VectorGenerator, ScaledVector } from './models/scaledvector.model';
+import { Scene, PerspectiveCamera, WebGLRenderer, OrbitControls as CameraControls, Vector3, Line } from 'three';
+import { VectorGenerator, ScaledVector } from '../models/scaledvector.model';
 const OrbitControls = require('three-orbit-controls')(THREE);
 
-class App {
+class Builder {
     scene: Scene;
     camera: PerspectiveCamera;
     renderer: WebGLRenderer;
     controls: CameraControls;
     vectorGenerator: VectorGenerator;
     data: any;
+    venue: Line;
+    venueColor: 0x00ff00;
 
-    constructor(data: any) {
+    constructor(data: any, container: HTMLDivElement) {
         this.data = data;
 
         this.render = this.render.bind(this);
@@ -21,12 +23,12 @@ class App {
         this.scene = new THREE.Scene();
         this.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
         this.renderer = new THREE.WebGLRenderer();
-        this.renderer.setSize(window.innerWidth, window.innerHeight);
-        document.body.appendChild(this.renderer.domElement);
+        this.renderer.setSize(container.getBoundingClientRect().width, window.innerHeight);
+        container.appendChild(this.renderer.domElement);
 
         window.addEventListener('resize', () => {
-            this.renderer.setSize(window.innerWidth, window.innerHeight);
-            this.camera.aspect = window.innerWidth / window.innerHeight;
+            this.renderer.setSize(container.getBoundingClientRect().width, window.innerHeight);
+            this.camera.aspect = container.offsetWidth / window.innerHeight;
             this.camera.updateProjectionMatrix();
         });
 
@@ -56,13 +58,17 @@ class App {
 
     setOffsets() {
         let coords = this.data.features.find((i: any) => typeof i.properties.DISPLAY_XY !== "undefined").properties.DISPLAY_XY.coordinates;
-        
+
         this.vectorGenerator = new VectorGenerator(undefined, coords[0], coords[1]);
+    }
+
+    setVenueColor(color: number){
+        this.venue.material.color.setHex(color);
     }
 
     addMultiPolygon(i: any) {
         let material = new THREE.LineBasicMaterial({
-            color: 0xff0000
+            color: this.venueColor
         });
         
         let geometry = new THREE.Geometry();
@@ -79,9 +85,9 @@ class App {
             });
         });
 
-        let line = new THREE.Line(geometry, material);
+        this.venue = new THREE.Line(geometry, material);
 
-        this.scene.add(line);
+        this.scene.add(this.venue);
     }
 
     viewLoop() {
@@ -99,4 +105,4 @@ class App {
     }
 }
 
-export default App;
+export default Builder;

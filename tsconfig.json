@@ -2,8 +2,11 @@
   "compilerOptions": {
     "outDir": "./dist/",
     "noImplicitAny": true,
+    "moduleResolution": "node",
+    "sourceMap": true,
     "module": "esnext",
-    "target": "es5",
+    "target": "es2015",
+    "jsx": "react",
     "declaration": true
   }
 }

@@ -1,0 +1,30 @@
+#geo3d-view-container {
+    flex: 1;
+    display: flex;
+    background-color: #303030;
+}
+.aside {
+    width: 300px;
+    max-width: 25%;
+    background-color: #fff;
+    padding: 15px;
+    display: flex;
+    align-self: stretch;
+    flex-direction: column;
+    justify-content: space-between;
+    border-right: 1px solid #ddd;
+}
+.aside-top {
+    display: flex;
+    flex-direction: column;
+}
+.aside-top > a {
+    color: #0277bd;
+    opacity: .4;
+}
+.aside-top > a:hover {
+    opacity: .7;
+}
+.aside-top > a:active {
+    opacity: 1;
+}

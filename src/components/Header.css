@@ -1,0 +1,32 @@
+header {
+    height: 50px;
+    display: flex;
+    padding: 15px;
+    width: calc(100% - 30px);
+    background-color: #23202a;
+    align-items: center;
+    z-index: 30;
+}
+h1.title {
+    font-size: 35px;
+    color: #fff;
+    margin-right: 30px;
+}
+a {
+    color: #fff;
+    text-decoration: none;
+    font-size: 17px;
+    padding: 10px;
+    font-weight: 500;
+    opacity: .4;
+    transition: all .2s;
+}
+a:hover {
+    opacity: .7;
+}
+a:active {
+    opacity: 1.0;
+}
+a.active {
+    opacity: 1;
+}

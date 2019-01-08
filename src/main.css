@@ -1,0 +1,42 @@
+/* global styles */
+@import url('https://fonts.googleapis.com/css?family=Roboto:300,400,500,700');
+* {
+    font-family: Roboto, Helvetica, Arial, sans-serif;
+}
+body {
+    margin: 0px;
+    padding: 0px;
+    color: #303030;
+}
+.btn-default {
+    border: none;
+    background-color: #388e3c;
+    padding: 8pt;
+    font-size: 13pt;
+    font-family: Roboto, sans-serif;
+    color: #fff;
+    cursor: pointer;
+    outline: none;
+    transition: opacity .2s;
+}
+.btn-default:hover {
+    opacity: .7;
+}
+.btn-default:active {
+    opacity: .4;
+}
+.form-group {
+    display: flex;
+    flex-direction: column;
+}
+.form-group > button {
+    margin-top: 10px;
+}
+.label-default {
+    padding-left: 7pt;
+    margin-bottom: 5px;
+}
+.inp-default {
+    padding: 5pt;
+    font-size: 13pt;
+}
