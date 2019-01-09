@@ -13,22 +13,22 @@ export default class Editor extends React.Component {
         super(props);
 
         this.saveChanges = this.saveChanges.bind(this);
-
-        this.state = {
-            venueOutline: ""
-        };
     }
 
     async componentDidMount() {
-        let data = await fetch(`/api/v1/get_test_data`).then(re => re.json());
-        
+        let data = await fetch(`/api/v1/get_venue`).then(re => re.json());
         let b: Builder = new Builder(data, this.refs["3d-view-container"] as HTMLDivElement);
 
         this.builder = b;
+
+        let offsetCoords = data.features.find((i: any) => typeof i.properties.DISPLAY_XY !== "undefined").properties.DISPLAY_XY.coordinates;
+
+        this.builder.setOffsets(offsetCoords);
+        this.builder.processData(data);
     }
 
     saveChanges() {
-        this.builder.setVenueColor(parseInt(this.venueOutline, 16));
+        this.venueOutline.length === 6 ? this.builder.setVenueColor(parseInt(this.venueOutline, 16)) : null;
     }
     
     render() {
