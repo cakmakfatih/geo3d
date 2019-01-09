@@ -12,7 +12,7 @@ export default class Editor extends React.Component {
     constructor(props: any) {
         super(props);
 
-        this.changeValues = this.changeValues.bind(this);
+        this.saveChanges = this.saveChanges.bind(this);
 
         this.state = {
             venueOutline: ""
@@ -27,7 +27,7 @@ export default class Editor extends React.Component {
         this.builder = b;
     }
 
-    changeValues() {
+    saveChanges() {
         this.builder.setVenueColor(parseInt(this.venueOutline, 16));
     }
     
@@ -42,7 +42,7 @@ export default class Editor extends React.Component {
                             <input type="text" maxLength={6} placeholder="Hex" className="inp-default" onChange={(e) => this.venueOutline = e.target.value} />
                         </div>
                     </section>
-                    <button className="btn-default" onClick={this.changeValues}>Save</button>
+                    <button className="btn-default" onClick={this.saveChanges}>Save</button>
                 </aside>
                 <div ref="3d-view-container" id="geo3d-view-container" />
             </Layout>
