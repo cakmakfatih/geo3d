@@ -28,8 +28,6 @@ export default class Editor extends React.Component {
         this.builder.processData(venue);
 
         let buildings = await fetch(`/api/v1/get_buildings`).then(re => re.json());
-        
-        
     }
 
     saveChanges() {

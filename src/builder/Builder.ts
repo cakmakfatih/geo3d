@@ -17,7 +17,7 @@ class Builder {
     constructor(container: HTMLDivElement) {
         this.container = container;
 
-        this.venueColor = 0xffffff;
+        this.venueColor = 0x388e3c;
 
         this.render = this.render.bind(this);
         this.update = this.update.bind(this);
@@ -41,20 +41,20 @@ class Builder {
         this.controls.maxPolarAngle = 70;
         this.controls.minDistance = 10;
         this.controls.maxDistance = 2000;
-        this.addGround();
+
         this.addSkybox();
         this.viewLoop();
     }
 
-    addGround() {
+    addGround(coords: number[]) {
         var geometry = new THREE.PlaneGeometry( 10000, 10000, 32 );
         let textureLoader = new THREE.TextureLoader();
 
-        // mapbox "https://api.mapbox.com/styles/v1/mapbox/streets-v10/static/29.07107,41.00360,15.0,0,0/1280x1280?access_token=pk.eyJ1IjoiY2FrbWFrZmF0aWgiLCJhIjoiY2pxcGk1d3ZrMDFwYjQ5bzFqNncyYjl2NyJ9.MtGJZ74Cu-6R7K52rFrNeQ";
+        let mapImage = `https://api.mapbox.com/styles/v1/mapbox/streets-v10/static/${coords[0]},${coords[1]},15.0,0,0/1280x1280?access_token=pk.eyJ1IjoiY2FrbWFrZmF0aWgiLCJhIjoiY2pxcGk1d3ZrMDFwYjQ5bzFqNncyYjl2NyJ9.MtGJZ74Cu-6R7K52rFrNeQ`;
 
         // google maps https://maps.googleapis.com/maps/api/staticmap?center=41.00360,29.07107&zoom=15&size=1280x1280&maptype=roadmap&key=AIzaSyBd8aLg8GTphL37X1B0FmsJXamjJg8NU2Y
 
-        let map = textureLoader.load("staticmap.png");
+        let map = textureLoader.load(mapImage);
 
         map.anisotropy = this.renderer.capabilities.getMaxAnisotropy();
         map.minFilter = THREE.LinearFilter;
@@ -100,6 +100,7 @@ class Builder {
         this.vectorGenerator = new VectorGenerator(undefined, coords);
         this.camera.position.set(1000, 1000, 1000);
         this.camera.lookAt(0, 0, 0);
+        this.addGround(coords);
     }
 
     setVenueColor(color: number){
@@ -141,7 +142,7 @@ class Builder {
         this.venue = new THREE.Mesh(geometry, [material, sidesMaterial]);
         
         this.venue.rotation.x += -Math.PI / 2;
-        this.venue.position.setY(1);
+        this.venue.position.setY(4);
         this.scene.add(this.venue);
     }
 
