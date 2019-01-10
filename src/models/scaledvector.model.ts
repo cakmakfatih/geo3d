@@ -1,5 +1,8 @@
 export class VectorGenerator {
-    multiplier: number;
+    mapWidth: number;
+    mapHeight: number;
+    scaler: number;
+
     xOffset: number;
     zOffset: number;
 
@@ -7,18 +10,31 @@ export class VectorGenerator {
     y: number;
     z: number;
 
-    constructor(multiplier: number = 100000, xOffset: number, zOffset: number){
-        this.multiplier = multiplier || 100000;
+    constructor(scaler: number = 15000, coords: number[]){
+        this.mapWidth = 1280;
+        this.mapHeight = 1280;
 
-        this.xOffset = xOffset*this.multiplier;
-        this.zOffset = zOffset*this.multiplier;
+        let v = this.latLonToXY(coords);
+        
+        this.scaler = scaler * 10000/this.mapWidth;
+
+        this.xOffset = v[0]*this.scaler;
+        this.zOffset = v[1]*this.scaler;
     }
 
-    generateVector(coords: number[], y: number = 1): ScaledVector {
+    latLonToXY(coords: number[]): number[]{
+        return [
+            ((this.mapWidth/360) * (180 + coords[0])),
+            ((this.mapHeight/360) * (90 - coords[1]))
+        ];
+    }
+
+    generateVector(coords: number[], y: number = 2): ScaledVector {
+        let coordinates = this.latLonToXY(coords);
         return {
-            x: coords[0]*this.multiplier - this.xOffset,
+            x: coordinates[0]*this.scaler - this.xOffset,
             y: y,
-            z: coords[1]*this.multiplier - this.zOffset
+            z: coordinates[1]*this.scaler - this.zOffset
         } as ScaledVector;
     }    
 }

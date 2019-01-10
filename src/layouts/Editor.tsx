@@ -16,15 +16,20 @@ export default class Editor extends React.Component {
     }
 
     async componentDidMount() {
-        let data = await fetch(`/api/v1/get_venue`).then(re => re.json());
-        let b: Builder = new Builder(data, this.refs["3d-view-container"] as HTMLDivElement);
+        let venue = await fetch(`/api/v1/get_venue`).then(re => re.json());
+
+        let b: Builder = new Builder(this.refs["3d-view-container"] as HTMLDivElement);
 
         this.builder = b;
 
-        let offsetCoords = data.features.find((i: any) => typeof i.properties.DISPLAY_XY !== "undefined").properties.DISPLAY_XY.coordinates;
+        let offsetCoords = venue.features.find((i: any) => typeof i.properties.DISPLAY_XY !== "undefined").properties.DISPLAY_XY.coordinates;
 
         this.builder.setOffsets(offsetCoords);
-        this.builder.processData(data);
+        this.builder.processData(venue);
+
+        let buildings = await fetch(`/api/v1/get_buildings`).then(re => re.json());
+        
+        
     }
 
     saveChanges() {
