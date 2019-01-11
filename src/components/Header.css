@@ -12,7 +12,7 @@ h1.title {
     color: #fff;
     margin-right: 30px;
 }
-a {
+header > a {
     color: #fff;
     text-decoration: none;
     font-size: 17px;
@@ -21,12 +21,12 @@ a {
     opacity: .4;
     transition: all .2s;
 }
-a:hover {
+header > a:hover {
     opacity: .7;
 }
-a:active {
+header > a:active {
     opacity: 1.0;
 }
-a.active {
+header > a.active {
     opacity: 1;
 }

@@ -5,7 +5,7 @@ import Editor from './layouts/Editor';
 
 
 class App extends React.Component {
-    render() {
+    render = () => {
         return (
             <BrowserRouter>
                 <div>

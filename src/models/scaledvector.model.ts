@@ -22,14 +22,14 @@ export class VectorGenerator {
         this.zOffset = v[1]*this.scaler;
     }
 
-    latLonToXY(coords: number[]): number[]{
+    latLonToXY = (coords: number[]): number[] => {
         return [
             ((this.mapWidth/360) * (180 + coords[0])),
             ((this.mapHeight/360) * (90 - coords[1]))
         ];
     }
 
-    generateVector(coords: number[], y: number = 2): ScaledVector {
+    generateVector = (coords: number[], y: number = 2): ScaledVector => {
         let coordinates = this.latLonToXY(coords);
         return {
             x: coordinates[0]*this.scaler - this.xOffset,

@@ -18,10 +18,6 @@ class Builder {
         this.container = container;
 
         this.venueColor = 0x388e3c;
-
-        this.render = this.render.bind(this);
-        this.update = this.update.bind(this);
-        this.viewLoop = this.viewLoop.bind(this);
         
         this.scene = new THREE.Scene();
         this.camera = new THREE.PerspectiveCamera(90, this.container.getBoundingClientRect().width / this.container.getBoundingClientRect().height, 0.1, 10000);
@@ -67,7 +63,7 @@ class Builder {
         this.scene.add(ground);
     }
 
-    addSkybox() {
+    addSkybox = () => {
         let geometry = new THREE.BoxGeometry(10000, 10000, 10000);
 
         let material: THREE.MeshBasicMaterial = new THREE.MeshBasicMaterial({
@@ -80,11 +76,11 @@ class Builder {
         this.scene.add(cube);
     }
 
-    addLights() {
+    addLights = () => {
         // to-do add lights
     }
 
-    processData(data: any) {
+    processData = (data: any) => {
         data.features.forEach((i:any) => {
             switch(i.geometry.type){
                 case "MultiPolygon":
@@ -96,18 +92,18 @@ class Builder {
         });
     }
 
-    setOffsets(coords: number[]) {
+    setOffsets = (coords: number[]) => {
         this.vectorGenerator = new VectorGenerator(undefined, coords);
         this.camera.position.set(1000, 1000, 1000);
         this.camera.lookAt(0, 0, 0);
         this.addGround(coords);
     }
 
-    setVenueColor(color: number){
+    setVenueColor = (color: number) => {
         this.venue.material[0].color.setHex(color);
     }
 
-    add3DPolygon(i: any) {
+    add3DPolygon = (i: any) => {
         let material = new THREE.MeshBasicMaterial({
             color: this.venueColor
         });
@@ -146,7 +142,7 @@ class Builder {
         this.scene.add(this.venue);
     }
 
-    addMultiPolygon(i: any) {
+    addMultiPolygon = (i: any) => {
         let material = new THREE.LineBasicMaterial({
             color: this.venueColor
         });
@@ -170,17 +166,17 @@ class Builder {
         this.scene.add(line);
     }
 
-    viewLoop() {
+    viewLoop = () => {
         requestAnimationFrame(this.viewLoop);
         this.update();
         this.render();
     }
 
-    render() {
+    render = () => {
         this.renderer.render(this.scene, this.camera);
     }
 
-    update() {
+    update = () => {
         // update view
     }
 }
