@@ -287,11 +287,11 @@ export default class Editor extends React.Component<{}, {
         return (
             <aside className="aside">
                 <section className="aside-top">
-                    <div className="btn-back" onClick={() => this.setState({menu: "NEW_MODEL_1"})}>
-                        <i className="fas fa-chevron-left"></i>
-                        <span>BACK</span>
-                    </div>
+                    
                 </section>
+                <button className="btn-default" onClick={() => window.location.reload()}>
+                    TO MAIN MENU
+                </button>
             </aside>
         );
     }
