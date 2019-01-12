@@ -9,12 +9,12 @@ class Builder {
     renderer: WebGLRenderer;
     controls: CameraControls;
     vectorGenerator: VectorGenerator;
-    data: any;
+    objects: any;
     container: HTMLDivElement;
 
     constructor(container: HTMLDivElement) {
         this.container = container;
-        this.data = new Array<any>();
+        this.objects = new Array<any>();
         this.scene = new THREE.Scene();
         this.camera = new THREE.PerspectiveCamera(90, this.container.getBoundingClientRect().width / this.container.getBoundingClientRect().height, 0.1, 10000);
         this.renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -76,13 +76,13 @@ class Builder {
         // to-do add lights
     }
 
-    processData = (data: any) => {
-        this.data.push({id: data.id, name: data.name});
+    processData = (object: any) => {
+        this.objects.push({id: object.id, name: object.name, type3d: object.type3d});
 
-        data.features.forEach((i: any) => {
-            switch(data.type3d) {
+        object.features.forEach((i: any) => {
+            switch(object.type3d) {
                 case "3D_POLYGON":
-                    this.add3DPolygon(i, data.id);
+                    this.add3DPolygon(i, object.id);
                     break;
                 default:
                     break;
@@ -138,8 +138,8 @@ class Builder {
         object.rotation.x += -Math.PI / 2;
         object.position.setY(4);
 
-        this.data.find((i: any) => i.id === id).object = object;
-        console.log(this.data);
+        this.objects.find((i: any) => i.id === id).object = object;
+        console.log(this.objects);
         this.scene.add(object);
     }
 
