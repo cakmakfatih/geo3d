@@ -33,6 +33,16 @@ export default class Editor extends React.Component<{}, {
         this.objects = new Array<any>();
     }
 
+    guid = (): string => {
+        let s4 = () => {
+            return Math.floor((1 + Math.random()) * 0x10000)
+            .toString(16)
+            .substring(1);
+        };
+
+        return s4() + s4() + '-' + s4() + '-' + s4() + '-' + s4() + '-' + s4() + s4() + s4();
+    }
+
     sleep = (ms: number): Promise<Function> => {
         return new Promise(resolve => setTimeout(resolve, ms));
     }
@@ -128,7 +138,6 @@ export default class Editor extends React.Component<{}, {
             }
         } else {
             // unexpected format
-            console.log();
             return {
                 status: "error",
                 error: "Unexpected format in the provided data."
@@ -140,14 +149,14 @@ export default class Editor extends React.Component<{}, {
         if(!(this.objects.length === 0)) {
             this.objects = [];
         }
+
         let res = await this.readFile(e);
         
         if(res.status === "success") {
             let isVenue = this.isVenue(res.data);
             
             if(isVenue.status === "success") {
-                this.objects.push({...res.data, type3d: "VENUE"});
-                console.log(this.objects[0]);
+                this.objects.push({...res.data, type3d: "3D_POLYGON", name: "VENUE", id: this.guid()});
             } else {
                 console.log(isVenue.error);
             }
@@ -237,7 +246,7 @@ export default class Editor extends React.Component<{}, {
             let isVenue = this.isVenue(data);
             
             if(isVenue.status === "success") {
-                this.objects.push({...data, type3d: "VENUE"});
+                this.objects.push({...data, type3d: "3D_POLYGON", name: "VENUE", id: this.guid()});
                 this.setState({
                     menu: "NEW_MODEL_1"
                 });
@@ -274,9 +283,10 @@ export default class Editor extends React.Component<{}, {
             this.changeMenu("PROJECT_MENU");
             this.builder = new Builder(this.refs["3d-view-container"] as HTMLDivElement);
             
-            let offsetCoords = this.objects.find(i => i.type3d === "VENUE").features.find((i: any) => typeof i.properties.DISPLAY_XY !== "undefined").properties.DISPLAY_XY.coordinates;
+            let offsetCoords = this.objects.find(i => i.type3d === "3D_POLYGON").features.find((i: any) => typeof i.properties.DISPLAY_XY !== "undefined").properties.DISPLAY_XY.coordinates;
 
             this.builder.setOffsets(offsetCoords);
+
             this.builder.processData(this.objects[0]);
         } else {
             console.log("You can't create a project without providing a valid venue data and a name.");

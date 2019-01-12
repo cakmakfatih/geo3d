@@ -10,15 +10,11 @@ class Builder {
     controls: CameraControls;
     vectorGenerator: VectorGenerator;
     data: any;
-    venue: any;
-    venueColor: number;
     container: HTMLDivElement;
 
     constructor(container: HTMLDivElement) {
         this.container = container;
-
-        this.venueColor = 0x388e3c;
-        
+        this.data = new Array<any>();
         this.scene = new THREE.Scene();
         this.camera = new THREE.PerspectiveCamera(90, this.container.getBoundingClientRect().width / this.container.getBoundingClientRect().height, 0.1, 10000);
         this.renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -81,10 +77,12 @@ class Builder {
     }
 
     processData = (data: any) => {
-        data.features.forEach((i:any) => {
-            switch(i.geometry.type){
-                case "MultiPolygon":
-                    this.add3DPolygon(i);
+        this.data.push({id: data.id, name: data.name});
+
+        data.features.forEach((i: any) => {
+            switch(data.type3d) {
+                case "3D_POLYGON":
+                    this.add3DPolygon(i, data.id);
                     break;
                 default:
                     break;
@@ -99,13 +97,13 @@ class Builder {
         this.addGround(coords);
     }
 
-    setVenueColor = (color: number) => {
-        this.venue.material[0].color.setHex(color);
+    setVenueColor = (color: number, index: number) => {
+        
     }
 
-    add3DPolygon = (i: any) => {
+    add3DPolygon = (i: any, id: string) => {
         let material = new THREE.MeshBasicMaterial({
-            color: this.venueColor
+            color: 0xffffff
         });
 
         let sidesMaterial = new THREE.MeshBasicMaterial( { color: 0xffffff, side: THREE.DoubleSide } );
@@ -135,16 +133,19 @@ class Builder {
         });
 
         let geometry = new THREE.ExtrudeBufferGeometry(shape, extrudeSettings);
-        this.venue = new THREE.Mesh(geometry, [material, sidesMaterial]);
+        let object = new THREE.Mesh(geometry, [material, sidesMaterial]);
         
-        this.venue.rotation.x += -Math.PI / 2;
-        this.venue.position.setY(4);
-        this.scene.add(this.venue);
+        object.rotation.x += -Math.PI / 2;
+        object.position.setY(4);
+
+        this.data.find((i: any) => i.id === id).object = object;
+        console.log(this.data);
+        this.scene.add(object);
     }
 
     addMultiPolygon = (i: any) => {
         let material = new THREE.LineBasicMaterial({
-            color: this.venueColor
+            color: 0xffffff
         });
         
         let geometry = new THREE.Geometry();
