@@ -38,12 +38,9 @@ body {
     opacity: .4;
 }
 .form-group {
-    margin-top: 10px;
+    margin-top: 5px;
     display: flex;
     flex-direction: column;
-}
-.form-group > button {
-    margin-top: 5px;
 }
 .label-default {
     color: #404040;

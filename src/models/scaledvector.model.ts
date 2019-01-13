@@ -10,13 +10,13 @@ export class VectorGenerator {
     y: number;
     z: number;
 
-    constructor(scaler: number = 15000, coords: number[]){
+    constructor(scaler: number = 360/0.011, coords: number[]){
         this.mapWidth = 1280;
         this.mapHeight = 1280;
 
         let v = this.latLonToXY(coords);
         
-        this.scaler = scaler * 10000/this.mapWidth;
+        this.scaler = scaler * this.mapWidth/360;
 
         this.xOffset = v[0]*this.scaler;
         this.zOffset = v[1]*this.scaler;

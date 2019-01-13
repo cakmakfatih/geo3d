@@ -104,10 +104,6 @@ class Builder {
         this.addGround(coords);
     }
 
-    setVenueColor = (color: number, index: number) => {
-        
-    }
-
     add3DPolygon = (i: any, id: string, settings: any) => {
         let material = new THREE.MeshBasicMaterial({
             color: parseInt(settings.material.color, 16)
@@ -126,7 +122,7 @@ class Builder {
                 k.slice(1).forEach((q: any) => {
                     let scaledVector: ScaledVector = this.vectorGenerator.generateVector(q);
                     shape.lineTo(scaledVector.x, -scaledVector.z);
-                })
+                });
             });
         });
 

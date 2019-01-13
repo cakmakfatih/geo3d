@@ -81,6 +81,28 @@ export default class Editor extends React.Component<{}, {
         }
     }
 
+    saveProjectLocal = () => {
+        let projectData = this.getProjectData();
+        let filename = `${projectData.projectName}.geo3d`;
+
+        let file = new File([JSON.stringify(projectData, null, 2)], `${filename}`, {type: "text/plain;charset=utf-8"});
+
+        if (window.navigator.msSaveOrOpenBlob)
+            window.navigator.msSaveOrOpenBlob(file, filename);
+        else {
+            let a = document.createElement("a"),
+                url = URL.createObjectURL(file);
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            setTimeout(() => {
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(url);  
+            }, 0); 
+        }
+    }
+
     readFile = async (e: any, ext: string) => {
         if(e.target.files.length === 1) {
             let file = e.target.files[0];
@@ -318,13 +340,14 @@ export default class Editor extends React.Component<{}, {
                     </div>
                     <div className="form-group">
                         <label htmlFor="up-v" className="btn-default btn-bordered">
-                            <i className="fas fa-upload"></i>
+                            <i className="far fa-folder-open"></i>
                             OPEN
                         </label>
-                        <input type="file" ref="up-v" id="up-v" className="upload-default" onChange={this.readGeo3D} />
+                        <input type="file" accept=".geo3d" id="up-v" className="upload-default" onChange={this.readGeo3D} />
                     </div>
                 </section>
-                <Link to="/" className="btn-default btn-bordered">
+                <Link to="/" className="btn-link btn-default btn-bordered">
+                    <i className="far fa-times-circle"></i>
                     EXIT
                 </Link>
             </aside>
@@ -356,10 +379,10 @@ export default class Editor extends React.Component<{}, {
                     </div>
                     <div className="form-group">
                         <label htmlFor="up-v" className="btn-default">
-                            <i className="fas fa-upload"></i>
+                            <i className="fas fa-folder-open"></i>
                             Venue GeoJSON
                         </label>
-                        <input type="file" ref="up-v" id="up-v" className="upload-default" onChange={this.readVenue} />
+                        <input type="file" accept=".geojson" id="up-v" className="upload-default" onChange={this.readVenue} />
                     </div>
                     <div className="form-group">
                         <span className="link-span" onClick={() => this.setState({menu: "MANUAL_GEOJSON"})}>Alternatively, you can manually enter GeoJSON data</span>

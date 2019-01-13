@@ -1,7 +1,7 @@
 export const clone = (obj: any): any => {
     let copy: MapSA;
 
-    if (null == obj || "object" != typeof obj) return obj;
+    if (null === obj || "object" !== typeof obj) return obj;
 
     if (obj instanceof Date) {
         copy = new Date();
@@ -11,7 +11,7 @@ export const clone = (obj: any): any => {
 
     if (obj instanceof Array) {
         copy = [];
-        for (var i = 0, len = obj.length; i < len; i++) {
+        for (let i = 0, len = obj.length; i < len; i++) {
             copy[i] = clone(obj[i]);
         }
         return copy;
@@ -19,7 +19,7 @@ export const clone = (obj: any): any => {
 
     if (obj instanceof Object) {
         copy = {};
-        for (var attr in obj) {
+        for (let attr in obj) {
             if (obj.hasOwnProperty(attr)) copy[attr] = clone(obj[attr]);
         }
         return copy;
