@@ -19,7 +19,9 @@ export default class Editor extends React.Component<{}, {
         super(props);
 
         this.project = new Object();
-        this.project.projectName = "";
+
+        this.project.projectName = new String();
+        this.project.projectDescription = new String();
 
         let objects = new Array<any>();
 
@@ -78,7 +80,7 @@ export default class Editor extends React.Component<{}, {
         }
     }
 
-    readFile = async (e: any) => {
+    readFile = async (e: any, ext: string) => {
         if(e.target.files.length === 1) {
             let file = e.target.files[0];
             let fileExtArr = (/[.]/.exec(file.name)) ? /[^.]+$/.exec(file.name) : undefined;
@@ -86,7 +88,7 @@ export default class Editor extends React.Component<{}, {
             if(typeof fileExtArr !== "undefined") {
                 let fileExt = fileExtArr[0];
 
-                if(fileExt === "geojson" || fileExt === "json") {
+                if(fileExt === ext || fileExt === "json") {
                     this.reader.readAsText(file);
                     let result: any = await this.fetchData();
                     
@@ -144,6 +146,44 @@ export default class Editor extends React.Component<{}, {
         }
     }
 
+    isGeo3D = (d: any) => {
+        if(typeof d.coordinates !== "undefined" && typeof d.id !== "undefined" && typeof d.objects !== "undefined" && typeof d.projectName !== "undefined" && typeof d.projectDescription !== "undefined") {
+            return {
+                "status": "success"
+            };
+        } else {
+            // unexpected format
+            return {
+                status: "error",
+                error: "Unexpected format in the provided data."
+            };
+        }
+    }
+
+    readGeo3D = async (e: any) => {
+        let { objects } = this.state;
+
+        if(!(objects.length === 0)) {
+            this.setState({
+                objects: new Array<any>()
+            });
+        }
+
+        let res = await this.readFile(e, "geo3d");
+        
+        if(res.status === "success") {
+            let isGeo3D = this.isGeo3D(res.data);
+
+            if(isGeo3D.status === "success") {
+                this.openProject(res.data);
+            } else {
+                throw new Error(isGeo3D.error);
+            }
+        } else {
+            throw new Error(res.error);
+        }
+    }
+
     readVenue = async (e: any) => {
         let { objects } = this.state;
 
@@ -153,7 +193,7 @@ export default class Editor extends React.Component<{}, {
             });
         }
 
-        let res = await this.readFile(e);
+        let res = await this.readFile(e, "geojson");
         
         if(res.status === "success") {
             let isVenue = this.isVenue(res.data);
@@ -163,29 +203,23 @@ export default class Editor extends React.Component<{}, {
 
                 objects.push({data: res.data, type3d: "3D_POLYGON", name: "VENUE", id, level: 0});
 
-                this.project = {
-                    ...this.project,
-                    startObjectID: id
-                };
-
                 this.setState({
                     objects
                 });
             } else {
-                console.log(isVenue.error);
+                throw new Error(isVenue.error);
             }
         } else {
-            console.log(res.error);
+            throw new Error(res.error);
         }
     }
 
     renderMenu = (): JSX.Element => {
         let { menu } = this.state;
 
-        switch(menu || "") {
-            case "START": {
-                return this.asideEnter();
-            }
+        switch(menu) {
+            case "START":
+                return this.startMenu();
             case "NEW_MODEL_1":
                 return this.newModel1();
             case "MANUAL_GEOJSON":
@@ -198,13 +232,22 @@ export default class Editor extends React.Component<{}, {
         }
     }
 
-    asideEnter = (): JSX.Element => {
+    startMenu = (): JSX.Element => {
         return (
             <aside className="aside">
                 <section className="aside-top">
                     <div className="form-group">
-                        <button className="btn-default btn-bordered" onClick={() => this.changeMenu("NEW_MODEL_1")}>NEW</button>
-                        <button className="btn-default btn-bordered">OPEN</button>
+                        <button className="btn-default btn-bordered" onClick={() => this.changeMenu("NEW_MODEL_1")}>
+                            <i className="fas fa-plus"></i>
+                            NEW
+                        </button>
+                    </div>
+                    <div className="form-group">
+                        <label htmlFor="up-v" className="btn-default btn-bordered">
+                            <i className="fas fa-upload"></i>
+                            OPEN
+                        </label>
+                        <input type="file" ref="up-v" id="up-v" className="upload-default" onChange={this.readGeo3D} />
                     </div>
                 </section>
                 <Link to="/" className="btn-default btn-bordered">
@@ -219,7 +262,8 @@ export default class Editor extends React.Component<{}, {
             <aside className="aside">
                 <section className="aside-top">
                     <div className="btn-back" onClick={() => {
-                        this.project.projectName = "";
+                        this.project.projectName = new String();
+                        this.project.projectDescription = new String();
                         this.setState({
                             menu: "START",
                             objects: new Array<any>()
@@ -234,7 +278,7 @@ export default class Editor extends React.Component<{}, {
                     </div>
                     <div className="form-group">
                         <label htmlFor="" className="label-default">Project Description</label>
-                        <textarea rows={5} className="inp-default" />
+                        <textarea rows={5} className="inp-default" onChange={(e) => this.project.projectDescription = e.target.value} />
                     </div>
                     <div className="form-group">
                         <label htmlFor="up-v" className="btn-default">
@@ -267,20 +311,15 @@ export default class Editor extends React.Component<{}, {
 
                 objects.push({data, type3d: "3D_POLYGON", name: "VENUE", id, level: 0});
 
-                this.project = {
-                    ...this.project,
-                    startObjectID: id
-                };
-
                 this.setState({
                     menu: "NEW_MODEL_1",
                     objects
                 });
             } else {
-                console.log(isVenue.error);
+                throw new Error(isVenue.error);
             }
         } catch(e) {
-            console.log(e);
+            throw new Error(e);
         }
     }
 
@@ -324,12 +363,33 @@ export default class Editor extends React.Component<{}, {
             let offsetCoords = objects.find(i => i.type3d === "3D_POLYGON").data.features.find((i: any) => typeof i.properties.DISPLAY_XY !== "undefined").properties.DISPLAY_XY.coordinates;
 
             this.project.coordinates = {lat: offsetCoords[0], lon: offsetCoords[1]};
-
-            this.builder.createProject(this.project);
-            this.builder.processData(objects[0]);
+            
+            this.builder.openProject(this.getProjectData());
         } else {
-            console.log("You can't create a project without providing a valid venue data and a name.");
+            throw new Error("You can't create a project without providing a valid venue data and a name.");
         }
+    }
+
+    openProject = (data: any) => {
+        let { 
+            projectName,
+            projectDescription,
+            id,
+            objects,
+            coordinates
+        } = data;
+
+        this.setState({
+            objects
+        });
+
+        this.project = { projectName, projectDescription, coordinates, id };
+
+        this.changeMenu("PROJECT_MENU");
+        this.builder = new Builder(this.refs["3d-view-container"] as HTMLDivElement);
+        
+        this.builder.openProject(this.getProjectData());
+        console.log(this.getProjectData());
     }
 
     projectMenu = () => {

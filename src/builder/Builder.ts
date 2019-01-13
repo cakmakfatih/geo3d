@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { Scene, PerspectiveCamera, WebGLRenderer, OrbitControls as CameraControls, Vector3 } from 'three';
 import Config from './../config.json';
 import { VectorGenerator, ScaledVector } from '../models/scaledvector.model';
+import { clone } from './../services/clone.service';
 const OrbitControls = require('three-orbit-controls')(THREE);
 
 class Builder {
@@ -62,11 +63,10 @@ class Builder {
 
         let material: THREE.MeshBasicMaterial = new THREE.MeshBasicMaterial({
             side: THREE.DoubleSide,
-            color: 0xe5e5e5
+            color: 0x000000
         });
 
         let cube = new THREE.Mesh(geometry, material);
-        cube.position.setY(2500);
         this.scene.add(cube);
     }
 
@@ -74,18 +74,21 @@ class Builder {
         // to-do add lights
     }
 
-    createProject = (project: any) => {
-        this.project = {...project, objects: new Array<any>()};
-        this.setOffsets([project.coordinates.lat, project.coordinates.lon]);
+    openProject = (project: any) => {
+        this.project = clone(project);
+
+        this.setOffsets([this.project.coordinates.lat, this.project.coordinates.lon]);
+        
+        this.project.objects.forEach((i: any) => {
+            this.processData(i);
+        });
     }
 
     processData = (object: any) => {
-        this.project.objects.push({id: object.id, name: object.name, level: object.level, type3d: object.type3d});
-
         object.data.features.forEach((i: any) => {
             switch(object.type3d) {
                 case "3D_POLYGON":
-                    this.add3DPolygon(i, object.id);
+                    this.add3DPolygon(i, object.id, object.settings);
                     break;
                 default:
                     break;
@@ -106,7 +109,7 @@ class Builder {
         
     }
 
-    add3DPolygon = (i: any, id: string) => {
+    add3DPolygon = (i: any, id: string, settings: any = Config.extrudeSettings) => {
         let material = new THREE.MeshBasicMaterial({
             color: parseInt(Config.defaultColor, 16)
         });
@@ -119,8 +122,6 @@ class Builder {
 
         shape.moveTo(startCoords.x, -startCoords.z);
 
-        let extrudeSettings = Config.extrudeSettings;
-
         i.geometry.coordinates.forEach((j: any) => {
             j.forEach((k: any) => {
                 k.slice(1).forEach((q: any) => {
@@ -130,11 +131,11 @@ class Builder {
             });
         });
 
-        let geometry = new THREE.ExtrudeBufferGeometry(shape, extrudeSettings);
+        let geometry = new THREE.ExtrudeBufferGeometry(shape, settings);
         let item = new THREE.Mesh(geometry, [material, sidesMaterial]);
         
         item.rotation.x += -Math.PI / 2;
-        item.position.setY(extrudeSettings.depth / 2);
+        item.position.setY(settings.depth / 2);
 
         this.project.objects.find((i: any) => i.id === id).item = item;
 
@@ -155,7 +156,7 @@ class Builder {
                     let vector: Vector3 = new THREE.Vector3(scaledVector.x, scaledVector.y, scaledVector.z);
 
                     geometry.vertices.push(vector);
-                })
+                });
             });
         });
 
