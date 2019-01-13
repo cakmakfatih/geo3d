@@ -6,31 +6,30 @@ import { Link } from 'react-router-dom';
 
 export default class Editor extends React.Component<{}, {
     menu: string;
+    objects: Array<any>;
 }> {
     
     builder: Builder;
     lastMenu: string;
-    projectName: string;
-    venueColor: string;
-    objects: any[];
     reader: FileReader;
     lastReadFile: any;
+    project: any;
 
     constructor(props: any) {
         super(props);
 
-        this.state = {
-            menu: "START"
-        };
+        this.project = new Object();
+        this.project.projectName = "";
 
-        this.projectName = "";
+        let objects = new Array<any>();
+
+        this.state = {
+            menu: "START",
+            objects
+        };
 
         this.reader = new FileReader();
         this.reader.onload = this.readGeoJSON;
-    }
-
-    async componentDidMount() {
-        this.objects = new Array<any>();
     }
 
     guid = (): string => {
@@ -146,8 +145,12 @@ export default class Editor extends React.Component<{}, {
     }
 
     readVenue = async (e: any) => {
-        if(!(this.objects.length === 0)) {
-            this.objects = [];
+        let { objects } = this.state;
+
+        if(!(objects.length === 0)) {
+            this.setState({
+                objects: new Array<any>()
+            });
         }
 
         let res = await this.readFile(e);
@@ -156,7 +159,18 @@ export default class Editor extends React.Component<{}, {
             let isVenue = this.isVenue(res.data);
             
             if(isVenue.status === "success") {
-                this.objects.push({...res.data, type3d: "3D_POLYGON", name: "VENUE", id: this.guid()});
+                let id = this.guid();
+
+                objects.push({data: res.data, type3d: "3D_POLYGON", name: "VENUE", id, level: 0});
+
+                this.project = {
+                    ...this.project,
+                    startObjectID: id
+                };
+
+                this.setState({
+                    objects
+                });
             } else {
                 console.log(isVenue.error);
             }
@@ -166,7 +180,9 @@ export default class Editor extends React.Component<{}, {
     }
 
     renderMenu = (): JSX.Element => {
-        switch(this.state.menu) {
+        let { menu } = this.state;
+
+        switch(menu || "") {
             case "START": {
                 return this.asideEnter();
             }
@@ -203,10 +219,10 @@ export default class Editor extends React.Component<{}, {
             <aside className="aside">
                 <section className="aside-top">
                     <div className="btn-back" onClick={() => {
-                        this.objects = [];
-                        this.projectName = "";
+                        this.project.projectName = "";
                         this.setState({
-                            menu: "START"
+                            menu: "START",
+                            objects: new Array<any>()
                         });
                     }}>
                         <i className="fas fa-chevron-left"></i>
@@ -214,7 +230,7 @@ export default class Editor extends React.Component<{}, {
                     </div>
                     <div className="form-group">
                         <label htmlFor="" className="label-default">Project Name (*)</label>
-                        <input type="text" className="inp-default" onChange={(e) => this.projectName = e.target.value} />
+                        <input type="text" className="inp-default" onChange={(e) => this.project.projectName = e.target.value} />
                     </div>
                     <div className="form-group">
                         <label htmlFor="" className="label-default">Project Description</label>
@@ -239,6 +255,7 @@ export default class Editor extends React.Component<{}, {
     }
 
     validateEntered = () => {
+        let { objects } = this.state; 
         let { value } = (this.refs["manual-geojson"] as any);
         
         try {
@@ -246,9 +263,18 @@ export default class Editor extends React.Component<{}, {
             let isVenue = this.isVenue(data);
             
             if(isVenue.status === "success") {
-                this.objects.push({...data, type3d: "3D_POLYGON", name: "VENUE", id: this.guid()});
+                let id = this.guid();
+
+                objects.push({data, type3d: "3D_POLYGON", name: "VENUE", id, level: 0});
+
+                this.project = {
+                    ...this.project,
+                    startObjectID: id
+                };
+
                 this.setState({
-                    menu: "NEW_MODEL_1"
+                    menu: "NEW_MODEL_1",
+                    objects
                 });
             } else {
                 console.log(isVenue.error);
@@ -278,16 +304,31 @@ export default class Editor extends React.Component<{}, {
         );
     }
 
+    getProjectData = () => {
+        return {...this.project, objects: this.state.objects};
+    }
+
     createProject = () => {
-        if(this.objects.length > 0 && this.projectName.length > 0) {
+        let projectId = this.guid();
+        let { objects } = this.state;
+
+        this.project = {
+            ...this.project,
+            id: projectId
+        };
+
+        if(objects.length > 0 && this.project.projectName.length > 0) {
             this.changeMenu("PROJECT_MENU");
             this.builder = new Builder(this.refs["3d-view-container"] as HTMLDivElement);
-            
-            let offsetCoords = this.objects.find(i => i.type3d === "3D_POLYGON").features.find((i: any) => typeof i.properties.DISPLAY_XY !== "undefined").properties.DISPLAY_XY.coordinates;
 
-            this.builder.setOffsets(offsetCoords);
+            let offsetCoords = objects.find(i => i.type3d === "3D_POLYGON").data.features.find((i: any) => typeof i.properties.DISPLAY_XY !== "undefined").properties.DISPLAY_XY.coordinates;
 
-            this.builder.processData(this.objects[0]);
+            this.project.coordinates = {lat: offsetCoords[0], lon: offsetCoords[1]};
+
+            this.builder.createProject(this.project);
+            this.builder.processData(objects[0]);
+
+            console.log(this.getProjectData());
         } else {
             console.log("You can't create a project without providing a valid venue data and a name.");
         }
@@ -297,7 +338,7 @@ export default class Editor extends React.Component<{}, {
         return (
             <aside className="aside">
                 <section className="aside-top">
-                    
+
                 </section>
                 <button className="btn-default" onClick={() => window.location.reload()}>
                     TO MAIN MENU

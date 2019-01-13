@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { Scene, PerspectiveCamera, WebGLRenderer, OrbitControls as CameraControls, Vector3 } from 'three';
+import Config from './../config.json';
 import { VectorGenerator, ScaledVector } from '../models/scaledvector.model';
 const OrbitControls = require('three-orbit-controls')(THREE);
 
@@ -9,12 +10,11 @@ class Builder {
     renderer: WebGLRenderer;
     controls: CameraControls;
     vectorGenerator: VectorGenerator;
-    objects: any;
+    project: any;
     container: HTMLDivElement;
 
     constructor(container: HTMLDivElement) {
         this.container = container;
-        this.objects = new Array<any>();
         this.scene = new THREE.Scene();
         this.camera = new THREE.PerspectiveCamera(90, this.container.getBoundingClientRect().width / this.container.getBoundingClientRect().height, 0.1, 10000);
         this.renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -43,8 +43,6 @@ class Builder {
         let textureLoader = new THREE.TextureLoader();
 
         let mapImage = `https://api.mapbox.com/styles/v1/mapbox/streets-v10/static/${coords[0]},${coords[1]},15.0,0,0/1280x1280?access_token=pk.eyJ1IjoiY2FrbWFrZmF0aWgiLCJhIjoiY2pxcGk1d3ZrMDFwYjQ5bzFqNncyYjl2NyJ9.MtGJZ74Cu-6R7K52rFrNeQ`;
-
-        // google maps https://maps.googleapis.com/maps/api/staticmap?center=41.00360,29.07107&zoom=15&size=1280x1280&maptype=roadmap&key=AIzaSyBd8aLg8GTphL37X1B0FmsJXamjJg8NU2Y
 
         let map = textureLoader.load(mapImage);
 
@@ -76,10 +74,15 @@ class Builder {
         // to-do add lights
     }
 
-    processData = (object: any) => {
-        this.objects.push({id: object.id, name: object.name, type3d: object.type3d});
+    createProject = (project: any) => {
+        this.project = {...project, objects: new Array<any>()};
+        this.setOffsets([project.coordinates.lat, project.coordinates.lon]);
+    }
 
-        object.features.forEach((i: any) => {
+    processData = (object: any) => {
+        this.project.objects.push({id: object.id, name: object.name, level: object.level, type3d: object.type3d});
+
+        object.data.features.forEach((i: any) => {
             switch(object.type3d) {
                 case "3D_POLYGON":
                     this.add3DPolygon(i, object.id);
@@ -90,7 +93,9 @@ class Builder {
         });
     }
 
-    setOffsets = (coords: number[]) => {
+    setOffsets = (coords: any) => {
+        this.project.coordinates = coords;
+
         this.vectorGenerator = new VectorGenerator(undefined, coords);
         this.camera.position.set(1000, 1000, 1000);
         this.camera.lookAt(0, 0, 0);
@@ -103,10 +108,10 @@ class Builder {
 
     add3DPolygon = (i: any, id: string) => {
         let material = new THREE.MeshBasicMaterial({
-            color: 0xffffff
+            color: parseInt(Config.defaultColor, 16)
         });
 
-        let sidesMaterial = new THREE.MeshBasicMaterial( { color: 0xffffff, side: THREE.DoubleSide } );
+        let sidesMaterial = new THREE.MeshBasicMaterial({ color: parseInt(Config.sideColor, 16), side: THREE.DoubleSide });
 
         let shape = new THREE.Shape();
 
@@ -114,14 +119,7 @@ class Builder {
 
         shape.moveTo(startCoords.x, -startCoords.z);
 
-        let extrudeSettings = {
-            steps: 2,
-            depth: 4,
-            bevelEnabled: true,
-            bevelThickness: 1,
-            bevelSize: 1,
-            bevelSegments: 1
-        };
+        let extrudeSettings = Config.extrudeSettings;
 
         i.geometry.coordinates.forEach((j: any) => {
             j.forEach((k: any) => {
@@ -133,14 +131,14 @@ class Builder {
         });
 
         let geometry = new THREE.ExtrudeBufferGeometry(shape, extrudeSettings);
-        let object = new THREE.Mesh(geometry, [material, sidesMaterial]);
+        let item = new THREE.Mesh(geometry, [material, sidesMaterial]);
         
-        object.rotation.x += -Math.PI / 2;
-        object.position.setY(4);
+        item.rotation.x += -Math.PI / 2;
+        item.position.setY(extrudeSettings.depth / 2);
 
-        this.objects.find((i: any) => i.id === id).object = object;
-        console.log(this.objects);
-        this.scene.add(object);
+        this.project.objects.find((i: any) => i.id === id).item = item;
+
+        this.scene.add(item);
     }
 
     addMultiPolygon = (i: any) => {
