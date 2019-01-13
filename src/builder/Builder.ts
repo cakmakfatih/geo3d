@@ -1,6 +1,5 @@
 import * as THREE from 'three';
 import { Scene, PerspectiveCamera, WebGLRenderer, OrbitControls as CameraControls, Vector3 } from 'three';
-import Config from './../config.json';
 import { VectorGenerator, ScaledVector } from '../models/scaledvector.model';
 import { clone } from './../services/clone.service';
 const OrbitControls = require('three-orbit-controls')(THREE);
@@ -109,12 +108,12 @@ class Builder {
         
     }
 
-    add3DPolygon = (i: any, id: string, settings: any = Config.extrudeSettings) => {
+    add3DPolygon = (i: any, id: string, settings: any) => {
         let material = new THREE.MeshBasicMaterial({
-            color: parseInt(Config.defaultColor, 16)
+            color: parseInt(settings.material.color, 16)
         });
 
-        let sidesMaterial = new THREE.MeshBasicMaterial({ color: parseInt(Config.sideColor, 16), side: THREE.DoubleSide });
+        let sidesMaterial = new THREE.MeshBasicMaterial({ color: parseInt(settings.material.sideColor, 16), side: THREE.DoubleSide });
 
         let shape = new THREE.Shape();
 
@@ -131,11 +130,11 @@ class Builder {
             });
         });
 
-        let geometry = new THREE.ExtrudeBufferGeometry(shape, settings);
+        let geometry = new THREE.ExtrudeBufferGeometry(shape, settings.extrude);
         let item = new THREE.Mesh(geometry, [material, sidesMaterial]);
         
         item.rotation.x += -Math.PI / 2;
-        item.position.setY(settings.depth / 2);
+        item.position.setY(settings.extrude.depth / 2);
 
         this.project.objects.find((i: any) => i.id === id).item = item;
 

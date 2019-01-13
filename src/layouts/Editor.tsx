@@ -3,6 +3,7 @@ import './Editor.css';
 import Builder from './../builder/Builder';
 import Layout from './../components/Layout';
 import { Link } from 'react-router-dom';
+import Config from './../config.json';
 
 export default class Editor extends React.Component<{}, {
     menu: string;
@@ -201,7 +202,7 @@ export default class Editor extends React.Component<{}, {
             if(isVenue.status === "success") {
                 let id = this.guid();
 
-                objects.push({data: res.data, type3d: "3D_POLYGON", name: "VENUE", id, level: 0});
+                objects.push({data: res.data, type3d: "3D_POLYGON", name: "VENUE", id, level: 0, settings: {extrude: Config.extrudeSettings, material: {sideColor: Config.sideColor, color: Config.defaultColor}} });
 
                 this.setState({
                     objects
@@ -291,7 +292,7 @@ export default class Editor extends React.Component<{}, {
             if(isVenue.status === "success") {
                 let id = this.guid();
 
-                objects.push({data, type3d: "3D_POLYGON", name: "VENUE", id, level: 0});
+                objects.push({data, type3d: "3D_POLYGON", name: "VENUE", id, level: 0,settings: {extrude: Config.extrudeSettings, material: {sideColor: Config.sideColor, color: Config.defaultColor}}});
 
                 this.setState({
                     menu: "NEW_MODEL_1",
