@@ -214,6 +214,54 @@ export default class Editor extends React.Component<{}, {
         }
     }
 
+    getProjectData = () => {
+        return {...this.project, objects: this.state.objects};
+    }
+
+    createProject = () => {
+        let projectId = this.guid();
+        let { objects } = this.state;
+
+        this.project = {
+            ...this.project,
+            id: projectId
+        };
+
+        if(objects.length > 0 && this.project.projectName.length > 0) {
+            this.changeMenu("PROJECT_MENU");
+            this.builder = new Builder(this.refs["3d-view-container"] as HTMLDivElement);
+
+            let offsetCoords = objects.find(i => i.type3d === "3D_POLYGON").data.features.find((i: any) => typeof i.properties.DISPLAY_XY !== "undefined").properties.DISPLAY_XY.coordinates;
+
+            this.project.coordinates = {lat: offsetCoords[0], lon: offsetCoords[1]};
+            
+            this.builder.openProject(this.getProjectData());
+        } else {
+            throw new Error("You can't create a project without providing a valid venue data and a name.");
+        }
+    }
+
+    openProject = (data: any) => {
+        let { 
+            projectName,
+            projectDescription,
+            id,
+            objects,
+            coordinates
+        } = data;
+
+        this.setState({
+            objects
+        });
+
+        this.project = { projectName, projectDescription, coordinates, id };
+
+        this.changeMenu("PROJECT_MENU");
+        this.builder = new Builder(this.refs["3d-view-container"] as HTMLDivElement);
+        
+        this.builder.openProject(this.getProjectData());
+    }
+
     renderMenu = (): JSX.Element => {
         let { menu } = this.state;
 
@@ -229,6 +277,31 @@ export default class Editor extends React.Component<{}, {
             default: {
                 break;
             }
+        }
+    }
+
+    validateEntered = () => {
+        let { objects } = this.state; 
+        let { value } = (this.refs["manual-geojson"] as any);
+        
+        try {
+            let data = JSON.parse(value);
+            let isVenue = this.isVenue(data);
+            
+            if(isVenue.status === "success") {
+                let id = this.guid();
+
+                objects.push({data, type3d: "3D_POLYGON", name: "VENUE", id, level: 0});
+
+                this.setState({
+                    menu: "NEW_MODEL_1",
+                    objects
+                });
+            } else {
+                throw new Error(isVenue.error);
+            }
+        } catch(e) {
+            throw new Error(e);
         }
     }
 
@@ -298,31 +371,6 @@ export default class Editor extends React.Component<{}, {
         );
     }
 
-    validateEntered = () => {
-        let { objects } = this.state; 
-        let { value } = (this.refs["manual-geojson"] as any);
-        
-        try {
-            let data = JSON.parse(value);
-            let isVenue = this.isVenue(data);
-            
-            if(isVenue.status === "success") {
-                let id = this.guid();
-
-                objects.push({data, type3d: "3D_POLYGON", name: "VENUE", id, level: 0});
-
-                this.setState({
-                    menu: "NEW_MODEL_1",
-                    objects
-                });
-            } else {
-                throw new Error(isVenue.error);
-            }
-        } catch(e) {
-            throw new Error(e);
-        }
-    }
-
     manualGeoJSON = (): JSX.Element => {
         return (
             <aside className="aside">
@@ -341,55 +389,6 @@ export default class Editor extends React.Component<{}, {
                 </button>
             </aside>
         );
-    }
-
-    getProjectData = () => {
-        return {...this.project, objects: this.state.objects};
-    }
-
-    createProject = () => {
-        let projectId = this.guid();
-        let { objects } = this.state;
-
-        this.project = {
-            ...this.project,
-            id: projectId
-        };
-
-        if(objects.length > 0 && this.project.projectName.length > 0) {
-            this.changeMenu("PROJECT_MENU");
-            this.builder = new Builder(this.refs["3d-view-container"] as HTMLDivElement);
-
-            let offsetCoords = objects.find(i => i.type3d === "3D_POLYGON").data.features.find((i: any) => typeof i.properties.DISPLAY_XY !== "undefined").properties.DISPLAY_XY.coordinates;
-
-            this.project.coordinates = {lat: offsetCoords[0], lon: offsetCoords[1]};
-            
-            this.builder.openProject(this.getProjectData());
-        } else {
-            throw new Error("You can't create a project without providing a valid venue data and a name.");
-        }
-    }
-
-    openProject = (data: any) => {
-        let { 
-            projectName,
-            projectDescription,
-            id,
-            objects,
-            coordinates
-        } = data;
-
-        this.setState({
-            objects
-        });
-
-        this.project = { projectName, projectDescription, coordinates, id };
-
-        this.changeMenu("PROJECT_MENU");
-        this.builder = new Builder(this.refs["3d-view-container"] as HTMLDivElement);
-        
-        this.builder.openProject(this.getProjectData());
-        console.log(this.getProjectData());
     }
 
     projectMenu = () => {
