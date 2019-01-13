@@ -327,8 +327,6 @@ export default class Editor extends React.Component<{}, {
 
             this.builder.createProject(this.project);
             this.builder.processData(objects[0]);
-
-            console.log(this.getProjectData());
         } else {
             console.log("You can't create a project without providing a valid venue data and a name.");
         }
