@@ -1,7 +1,6 @@
 import * as THREE from 'three';
 import { Scene, PerspectiveCamera, WebGLRenderer, OrbitControls as CameraControls, Vector3 } from 'three';
 import { VectorGenerator, ScaledVector } from '../models/scaledvector.model';
-import { clone } from './../services/clone.service';
 const OrbitControls = require('three-orbit-controls')(THREE);
 
 class Builder {
@@ -74,7 +73,7 @@ class Builder {
     }
 
     openProject = (project: any) => {
-        this.project = clone(project);
+        this.project = Object.assign({}, project, {objects: project.objects.map((i: any) => Object.assign({}, i))});
 
         this.setOffsets([this.project.coordinates.lat, this.project.coordinates.lon]);
         
