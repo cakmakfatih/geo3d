@@ -3,7 +3,7 @@ import Layout from './../components/Layout';
 import Header from './../components/Header';
 
 export default class Home extends React.Component {
-    render = () => {
+    render = (): JSX.Element => {
         return (
             <Layout>
                 <Header />

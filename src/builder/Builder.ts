@@ -61,7 +61,7 @@ class Builder {
 
         let material: THREE.MeshBasicMaterial = new THREE.MeshBasicMaterial({
             side: THREE.DoubleSide,
-            color: 0x000000
+            color: 0xdddddd
         });
 
         let cube = new THREE.Mesh(geometry, material);

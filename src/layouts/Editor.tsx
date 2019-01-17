@@ -3,7 +3,7 @@ import './Editor.css';
 import Builder from './../builder/Builder';
 import Layout from './../components/Layout';
 import { Link } from 'react-router-dom';
-import Config from './../config.json';
+import * as Config from './../config.json';
 
 export default class Editor extends React.Component<{}, {
     menu: string;
@@ -27,7 +27,7 @@ export default class Editor extends React.Component<{}, {
         let objects = new Array<any>();
 
         this.state = {
-            menu: "START",
+            menu: "ADD_ONE",
             objects
         };
 
@@ -237,7 +237,7 @@ export default class Editor extends React.Component<{}, {
         }
     }
 
-    getProjectData = () => {
+    getProjectData = (): any => {
         return {...this.project, objects: this.state.objects};
     }
 
@@ -297,6 +297,8 @@ export default class Editor extends React.Component<{}, {
                 return this.manualGeoJSON();
             case "PROJECT_MENU":
                 return this.projectMenu();
+            case "ADD_ONE":
+                return this.addOne();
             default: {
                 break;
             }
@@ -415,20 +417,78 @@ export default class Editor extends React.Component<{}, {
         );
     }
 
-    projectMenu = () => {
+    projectMenu = (): JSX.Element => {
         return (
             <aside className="aside">
                 <section className="aside-top">
-
+                    <div className="form-group">
+                        <button className="btn-default" onClick={() => this.changeMenu("ADD_ONE")}>
+                            <i className="fas fa-plus"></i>
+                            ADD
+                        </button>
+                    </div>
+                    <div className="form-group">
+                        <button className="btn-default">
+                            <i className="fas fa-pen"></i>
+                            EDIT
+                        </button>
+                    </div>
                 </section>
                 <button className="btn-default" onClick={() => window.location.reload()}>
-                    TO MAIN MENU
+                    QUIT
+                </button>
+            </aside>
+        );
+    }
+
+    addOne = (): JSX.Element => {
+        return (
+            <aside className="aside">
+                <section className="aside-top">
+                    <div className="btn-back" onClick={() => this.setState({
+                        menu: this.lastMenu
+                    })}>
+                        <i className="fas fa-chevron-left"></i>
+                        <span>BACK</span>
+                    </div>
+                    <div className="form-group">
+                        <label htmlFor="" className="label-default">Name (*)</label>
+                        <input type="text" className="inp-default" onChange={(e) => this.project.projectName = e.target.value} />
+                    </div>
+                    <div className="form-group">
+                        <label htmlFor="" className="label-default">Level (*)</label>
+                        <input type="text" className="inp-default" onChange={(e) => this.project.projectName = e.target.value} />
+                    </div>
+                    <div className="form-group">
+                        <label htmlFor="" className="label-default">Type (*)</label>
+                        <select className="inp-default">
+                            <option value="">WALL</option>
+                            <option value="">GROUND</option>
+                            <option value="">OBJECT</option>
+                            <option value="">LINE</option>
+                            <option value="">PATH</option>
+                        </select>
+                    </div>
+                    <div className="form-group">
+                        <label htmlFor="up-v" className="btn-default">
+                            <i className="fas fa-upload"></i>
+                            GeoJSON
+                        </label>
+                        <input type="file" accept=".geojson" id="up-v" className="upload-default" onChange={this.readVenue} />
+                    </div>
+                    <div className="form-group">
+                        <span className="link-span" onClick={() => this.setState({menu: "MANUAL_GEOJSON"})}>Alternatively, you can manually enter GeoJSON data</span>
+                    </div>
+                </section>
+                <button className="btn-default btn-bordered" onClick={() => this.createProject()}>
+                    <i className="fas fa-plus"></i>
+                    ADD
                 </button>
             </aside>
         );
     }
     
-    render = () => {
+    render = (): JSX.Element => {
         return (
             <Layout flexDirection="row">
                 {this.renderMenu()}

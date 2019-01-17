@@ -2,7 +2,7 @@ import * as React from "react";
 import { NavLink } from "react-router-dom";
 import './Header.css';
 
-export default () => (
+export default (): JSX.Element => (
     <header>
         <h1 className="title">
             Geo3D
